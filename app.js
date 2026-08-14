@@ -196,7 +196,7 @@
     rows.forEach((r, i) => {
       const tr = document.createElement("tr");
       tr.className = "rank-" + (i + 1);
-      const medal = i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : "";
+      const medal = "";
       tr.innerHTML =
         `<td class="rank">${medal}${i + 1}</td>` +
         `<td>${escapeHtml(r.player)}</td>` +
@@ -214,7 +214,7 @@
     container.innerHTML = "";
     const pending = SCHEDULE.filter((m) => !matchSummary(m).complete).slice(0, 6);
     if (!pending.length) {
-      container.innerHTML = '<p class="hint">🎉 All matches complete!</p>';
+      container.innerHTML = '<p class="hint">All matches complete!</p>';
       return;
     }
     for (const m of pending) {
@@ -222,7 +222,7 @@
       card.className = "match-card";
       card.innerHTML =
         `<div class="date">Match #${m.id} · ${fmtDate(m.date)}</div>` +
-        `<div class="matchup">${escapeHtml(m.p1)} 🆚 ${escapeHtml(m.p2)}</div>`;
+        `<div class="matchup">${escapeHtml(m.p1)} vs ${escapeHtml(m.p2)}</div>`;
       card.addEventListener("click", () => openMatchModal(m.id));
       container.appendChild(card);
     }
@@ -255,7 +255,7 @@
       const wrap = document.createElement("div");
       wrap.className = "day-group";
       wrap.innerHTML =
-        `<h3>📅 ${fmtDate(date)} <span class="progress">${complete}/${matches.length} played</span></h3>`;
+        `<h3>${fmtDate(date)} <span class="progress">${complete}/${matches.length} played</span></h3>`;
       const table = document.createElement("table");
       table.className = "matches";
       table.innerHTML =
@@ -435,7 +435,7 @@
       let winner = "Tie";
       if (p1RW > p2RW) winner = match.p1;
       else if (p2RW > p1RW) winner = match.p2;
-      msg += `<br>🏆 Winner: <strong>${escapeHtml(winner)}</strong>`;
+      msg += `<br>Winner: <strong>${escapeHtml(winner)}</strong>`;
     } else {
       msg += `<br>Best of 3 — first to ${ROUND_WINS_TO_WIN_MATCH} round wins takes the match.`;
     }
@@ -568,7 +568,7 @@
     saveState();
     localStorage.setItem(REMOTE_APPLIED_KEY, fingerprint(remote));
     renderAll();
-    if (!silent) showBanner("📥 Loaded latest scores from repo.");
+    if (!silent) showBanner("Loaded latest scores from repo.");
   }
 
   async function autoSyncOnLoad() {
@@ -584,7 +584,7 @@
     if (lastApplied !== remoteFp) {
       // Newer version available in the repo — offer to load it.
       showBanner(
-        "📥 Newer scores available in the repo. " +
+        "Newer scores available in the repo. " +
         '<button id="sync-now-btn">Load them</button>' +
         ' <button id="sync-ignore-btn" class="ghost">Keep mine</button>'
       );

@@ -10,15 +10,15 @@
 <body>
   <header class="hero">
     <div class="hero-inner">
-      <h1>� <span id="title">Pickleball Tournament 2026</span> 🏓</h1>
+      <h1>&#127942; <span id="title">Pickleball Tournament 2026</span> &#127955;</h1>
     </div>
   </header>
 
   <nav class="tabs" role="tablist">
-    <button class="tab active" data-tab="dashboard" role="tab">📊 Dashboard</button>
-    <button class="tab" data-tab="schedule" role="tab">📅 Schedule</button>
-    <button class="tab" data-tab="players" role="tab">👥 Players</button>
-    <button class="tab" data-tab="data" role="tab">💾 Data</button>
+    <button class="tab active" data-tab="dashboard" role="tab">Dashboard</button>
+    <button class="tab" data-tab="schedule" role="tab">Schedule</button>
+    <button class="tab" data-tab="players" role="tab">Players</button>
+    <button class="tab" data-tab="data" role="tab">Data</button>
   </nav>
 
   <main>
@@ -26,7 +26,7 @@
     <section id="dashboard" class="tab-panel active">
       <div class="stats-grid" id="stats-grid"></div>
 
-      <h2>🥇 Points Leaderboard</h2>
+      <h2>Points Leaderboard</h2>
       <div class="table-wrap">
         <table class="leaderboard" id="leaderboard">
           <thead>
@@ -44,7 +44,7 @@
         </table>
       </div>
 
-      <h2>🕒 Next Up</h2>
+      <h2>Next Up</h2>
       <div id="next-up" class="next-up"></div>
     </section>
 
@@ -72,7 +72,7 @@
       <h2>Players</h2>
       <div class="player-add">
         <input type="text" id="new-player-name" placeholder="Add a new player…" />
-        <button id="add-player-btn">+ Add Player</button>
+        <button id="add-player-btn">Add Player</button>
       </div>
       <ul id="player-list" class="player-list"></ul>
       <p class="hint">
@@ -83,7 +83,7 @@
 
     <!-- Data -->
     <section id="data" class="tab-panel">
-      <h2>💾 Data / Backup</h2>
+      <h2>Data / Backup</h2>
       <p>
         Scores you enter are saved in your browser (localStorage). Use export /
         import to share results between devices, or commit an updated
@@ -91,11 +91,11 @@
         pulls the latest committed <code>results.json</code>.
       </p>
       <div class="data-actions">
-        <button id="sync-btn">🔄 Sync from repo</button>
-        <button id="export-btn">⬇️ Export JSON</button>
-        <button id="import-btn">⬆️ Import JSON</button>
+        <button id="sync-btn">Sync from repo</button>
+        <button id="export-btn">Export JSON</button>
+        <button id="import-btn">Import JSON</button>
         <input type="file" id="import-file" accept="application/json" hidden />
-        <button id="reset-btn" class="danger">🗑️ Reset all scores</button>
+        <button id="reset-btn" class="danger">Reset all scores</button>
       </div>
       <h3>Current results (read-only preview)</h3>
       <pre id="results-preview"></pre>
