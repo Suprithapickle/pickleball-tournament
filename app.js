@@ -275,17 +275,11 @@
         if (s.complete) tr.className = "completed";
         const roundCell = (idx) => {
           const hasResult = !!(r && r.rounds);
-          if (!hasResult || !r.rounds[idx]) {
-            if (idx === 2 && hasResult) return `<td class="rounds">0-0</td>`;
-            return `<td class="rounds">—</td>`;
-          }
+          if (!hasResult || !r.rounds[idx]) return `<td class="rounds">—</td>`;
           const rn = r.rounds[idx];
           const s1 = Number.isFinite(Number(rn.p1)) ? rn.p1 : null;
           const s2 = Number.isFinite(Number(rn.p2)) ? rn.p2 : null;
-          if (s1 === null && s2 === null) {
-            if (idx === 2) return `<td class="rounds">0-0</td>`;
-            return `<td class="rounds">—</td>`;
-          }
+          if (s1 === null && s2 === null) return `<td class="rounds">—</td>`;
           return `<td class="rounds">${s1 ?? 0}-${s2 ?? 0}</td>`;
         };
 
