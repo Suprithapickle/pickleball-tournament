@@ -152,6 +152,12 @@ table.leaderboard td.points {
   font-weight: 700;
   color: var(--accent);
   text-align: right;
+  width: 70px;
+  white-space: nowrap;
+}
+table.leaderboard th:last-child {
+  width: 70px;
+  text-align: right;
 }
 table.leaderboard td.rank { font-weight: 700; width: 60px; }
 table.leaderboard tr.rank-1 td.rank { color: var(--gold); }
