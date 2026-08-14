@@ -81,7 +81,7 @@ const SCHEDULE = [
 ];
 
 const TOURNAMENT_META = {
-  title: "Pickleball Tournament",
+  title: "Pickleball Tournament 2026",
   subtitle: "Best of 3 Rounds · 2 Points per Round Win · Max 4 pts / match",
   info: "Start 5:30 PM · 2 Grounds (A & B) · 45 mins / match",
   duration: "Aug 6 – Aug 27, 2026"

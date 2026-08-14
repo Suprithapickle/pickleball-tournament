@@ -165,9 +165,6 @@
 
   function renderHero() {
     document.getElementById("title").textContent = TOURNAMENT_META.title;
-    document.getElementById("subtitle").textContent = TOURNAMENT_META.subtitle;
-    document.getElementById("info").textContent = TOURNAMENT_META.info;
-    document.getElementById("duration").textContent = "📅 " + TOURNAMENT_META.duration;
   }
 
   function renderStats() {
