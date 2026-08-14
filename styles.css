@@ -136,8 +136,12 @@ table.leaderboard {
 table.leaderboard th,
 table.leaderboard td {
   padding: 10px 12px;
-  text-align: left;
+  text-align: center;
   border-bottom: 1px solid var(--border);
+}
+table.leaderboard th:nth-child(2),
+table.leaderboard td:nth-child(2) {
+  text-align: left;
 }
 table.leaderboard th {
   background: var(--panel-2);
@@ -151,13 +155,13 @@ table.leaderboard tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
 table.leaderboard td.points {
   font-weight: 700;
   color: var(--accent);
-  text-align: right;
+  text-align: center;
   width: 70px;
   white-space: nowrap;
 }
 table.leaderboard th:last-child {
   width: 70px;
-  text-align: right;
+  text-align: center;
 }
 table.leaderboard td.rank { font-weight: 700; width: 60px; }
 table.leaderboard tr.rank-1 td.rank { color: var(--gold); }
