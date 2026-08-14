@@ -1,0 +1,32 @@
+{
+  "players": [
+    "Ravi Attada",
+    "Kavitha",
+    "Ravi Pasunuri",
+    "Likitha",
+    "Ramesh",
+    "Rohith",
+    "Naveen",
+    "Hari Krishna",
+    "Sathish",
+    "Pawan"
+  ],
+  "results": {
+    "1":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "2":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "3":  { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "4":  { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 2, "p2": 0 }, { "p1": 2,    "p2": 0    } ] },
+    "5":  { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "6":  { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "7":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "8":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "9":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "10": { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "11": { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "12": { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "13": { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "14": { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "15": { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "16": { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] }
+  }
+}

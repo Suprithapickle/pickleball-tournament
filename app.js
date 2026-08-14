@@ -7,7 +7,9 @@
 
   const STORAGE_KEY = "pickleball-tournament-v1";
   const POINTS_PER_ROUND_WIN = 2;
-  const ROUNDS_PER_MATCH = 3;
+  const ROUNDS_PER_MATCH = 3;         // upper bound: best-of-3
+  const ROUND_WINS_TO_WIN_MATCH = 2;   // best-of-3 → first to 2 round wins
+  const REMOTE_RESULTS_URL = "results.json";
 
   // -------------------- State --------------------
 
@@ -70,7 +72,10 @@
       if (s1 > s2) p1RW++;
       else if (s2 > s1) p2RW++;
     }
-    const complete = filledRounds === ROUNDS_PER_MATCH;
+    // Best-of-3: match is complete when either side reaches 2 round wins,
+    // or when all 3 rounds have been played (covers ties / draws).
+    const decided = p1RW >= ROUND_WINS_TO_WIN_MATCH || p2RW >= ROUND_WINS_TO_WIN_MATCH;
+    const complete = decided || filledRounds === ROUNDS_PER_MATCH;
     const p1Points = p1RW * POINTS_PER_ROUND_WIN;
     const p2Points = p2RW * POINTS_PER_ROUND_WIN;
     let winner = null;
@@ -375,7 +380,7 @@
     document.getElementById("modal-title").textContent =
       `Match #${match.id} — ${fmtDate(match.date)}`;
     document.getElementById("modal-sub").textContent =
-      `Enter round scores. Round winner earns ${POINTS_PER_ROUND_WIN} points.`;
+      `Best of 3 rounds. Round winner earns ${POINTS_PER_ROUND_WIN} points. R3 only if needed.`;
     document.getElementById("modal-p1").textContent = match.p1;
     document.getElementById("modal-p2").textContent = match.p2;
 
@@ -429,13 +434,13 @@
     let msg = `Rounds filled: <strong>${filled}/${ROUNDS_PER_MATCH}</strong> · ` +
               `Points — ${escapeHtml(match.p1)}: <strong>${p1Pts}</strong> · ` +
               `${escapeHtml(match.p2)}: <strong>${p2Pts}</strong>`;
-    if (filled === ROUNDS_PER_MATCH) {
+    if (filled === ROUNDS_PER_MATCH || p1RW >= ROUND_WINS_TO_WIN_MATCH || p2RW >= ROUND_WINS_TO_WIN_MATCH) {
       let winner = "Tie";
       if (p1RW > p2RW) winner = match.p1;
       else if (p2RW > p1RW) winner = match.p2;
       msg += `<br>🏆 Winner: <strong>${escapeHtml(winner)}</strong>`;
     } else {
-      msg += `<br>Fill all 3 rounds to lock in the winner.`;
+      msg += `<br>Best of 3 — first to ${ROUND_WINS_TO_WIN_MATCH} round wins takes the match.`;
     }
     document.getElementById("modal-summary").innerHTML = msg;
   }
@@ -533,6 +538,99 @@
     renderAll();
   }
 
+  // -------------------- Remote sync (results.json in the repo) --------------------
+
+  const REMOTE_APPLIED_KEY = "pickleball-remote-applied-v1";
+
+  async function fetchRemoteResults() {
+    try {
+      const url = REMOTE_RESULTS_URL + "?t=" + Date.now(); // cache-bust
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) return null;
+      const parsed = await resp.json();
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed;
+    } catch (e) {
+      console.info("No remote results available:", e);
+      return null;
+    }
+  }
+
+  function fingerprint(obj) {
+    return JSON.stringify(obj);
+  }
+
+  function applyRemote(remote, { silent } = { silent: false }) {
+    const players = Array.isArray(remote.players) && remote.players.length
+      ? remote.players
+      : state.players;
+    const results = remote.results && typeof remote.results === "object"
+      ? remote.results
+      : {};
+    state = { players, results };
+    saveState();
+    localStorage.setItem(REMOTE_APPLIED_KEY, fingerprint(remote));
+    renderAll();
+    if (!silent) showBanner("📥 Loaded latest scores from repo.");
+  }
+
+  async function autoSyncOnLoad() {
+    const remote = await fetchRemoteResults();
+    if (!remote) return;
+    const localEmpty = !state.results || Object.keys(state.results).length === 0;
+    const lastApplied = localStorage.getItem(REMOTE_APPLIED_KEY);
+    const remoteFp = fingerprint(remote);
+    if (localEmpty) {
+      applyRemote(remote, { silent: false });
+      return;
+    }
+    if (lastApplied !== remoteFp) {
+      // Newer version available in the repo — offer to load it.
+      showBanner(
+        "📥 Newer scores available in the repo. " +
+        '<button id="sync-now-btn">Load them</button>' +
+        ' <button id="sync-ignore-btn" class="ghost">Keep mine</button>'
+      );
+      const loadBtn = document.getElementById("sync-now-btn");
+      const ignoreBtn = document.getElementById("sync-ignore-btn");
+      if (loadBtn) loadBtn.addEventListener("click", () => applyRemote(remote));
+      if (ignoreBtn) ignoreBtn.addEventListener("click", () => {
+        localStorage.setItem(REMOTE_APPLIED_KEY, remoteFp);
+        hideBanner();
+      });
+    }
+  }
+
+  async function manualSyncFromRepo() {
+    const remote = await fetchRemoteResults();
+    if (!remote) {
+      alert("Could not fetch results.json from the repo.");
+      return;
+    }
+    if (!confirm("Replace your local data with the latest results.json from the repo?")) return;
+    applyRemote(remote, { silent: true });
+    alert("Loaded latest scores from repo.");
+  }
+
+  function showBanner(html) {
+    let el = document.getElementById("sync-banner");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "sync-banner";
+      el.className = "sync-banner";
+      document.body.appendChild(el);
+    }
+    el.innerHTML = html + ' <button class="banner-close" title="Dismiss">×</button>';
+    el.querySelector(".banner-close").addEventListener("click", hideBanner);
+    el.hidden = false;
+    setTimeout(() => { if (el && !el.querySelector("button:not(.banner-close)")) hideBanner(); }, 4000);
+  }
+
+  function hideBanner() {
+    const el = document.getElementById("sync-banner");
+    if (el) el.hidden = true;
+  }
+
   // -------------------- Utilities --------------------
 
   function escapeHtml(str) {
@@ -584,5 +682,9 @@
       e.target.value = "";
     });
     document.getElementById("reset-btn").addEventListener("click", resetScores);
+    const syncBtn = document.getElementById("sync-btn");
+    if (syncBtn) syncBtn.addEventListener("click", manualSyncFromRepo);
+
+    autoSyncOnLoad();
   });
 })();

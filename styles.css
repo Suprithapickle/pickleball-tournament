@@ -458,6 +458,49 @@ footer {
   border-top: 1px solid var(--border);
 }
 
+.sync-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  background: #082f49;
+  color: #e0f2fe;
+  border: 1px solid #0369a1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  max-width: 92%;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sync-banner[hidden] { display: none; }
+.sync-banner button {
+  background: var(--accent);
+  color: #063540;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.sync-banner button.ghost {
+  background: transparent;
+  color: #e0f2fe;
+  border: 1px solid #0ea5e9;
+}
+.sync-banner button.banner-close {
+  background: transparent;
+  color: #7dd3fc;
+  padding: 0 4px;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
 @media (max-width: 600px) {
   table.matches th:nth-child(1),
   table.matches td:nth-child(1) { display: none; }

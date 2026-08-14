@@ -90,9 +90,11 @@
       <p>
         Scores you enter are saved in your browser (localStorage). Use export /
         import to share results between devices, or commit an updated
-        <code>results.json</code> to the repository.
+        <code>results.json</code> to the repository. <strong>Sync from repo</strong>
+        pulls the latest committed <code>results.json</code>.
       </p>
       <div class="data-actions">
+        <button id="sync-btn">🔄 Sync from repo</button>
         <button id="export-btn">⬇️ Export JSON</button>
         <button id="import-btn">⬆️ Import JSON</button>
         <input type="file" id="import-file" accept="application/json" hidden />
