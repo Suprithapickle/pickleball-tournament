@@ -203,7 +203,6 @@
         `<td>${r.played}</td>` +
         `<td>${r.wins}</td>` +
         `<td>${r.losses}</td>` +
-        `<td>${r.roundWins}</td>` +
         `<td class="points">${r.points}</td>`;
       tbody.appendChild(tr);
     });
@@ -212,12 +211,14 @@
   function renderNextUp() {
     const container = document.getElementById("next-up");
     container.innerHTML = "";
-    const pending = SCHEDULE.filter((m) => !matchSummary(m).complete).slice(0, 6);
+    const pending = SCHEDULE.filter((m) => !matchSummary(m).complete);
     if (!pending.length) {
       container.innerHTML = '<p class="hint">🎉 All matches complete!</p>';
       return;
     }
-    for (const m of pending) {
+    const nextDate = pending[0].date;
+    const nextDayMatches = pending.filter((m) => m.date === nextDate);
+    for (const m of nextDayMatches) {
       const card = document.createElement("div");
       card.className = "match-card";
       card.innerHTML =
