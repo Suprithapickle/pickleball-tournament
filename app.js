@@ -177,7 +177,7 @@
       { label: "Matches Played", value: s.matchesPlayed, cls: "good" },
       { label: "Matches Remaining", value: s.matchesRemaining, cls: "warn" },
       { label: "Completion", value: s.completionPct + "%", cls: "accent" },
-      { label: "Duration", value: s.duration, cls: "" }
+      { label: "Round", value: s.duration, cls: "" }
     ];
     for (const c of cards) {
       const el = document.createElement("div");
