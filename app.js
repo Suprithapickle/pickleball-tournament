@@ -267,7 +267,6 @@
            <th>Player 2</th>
            <th>P1 Pts</th><th>P2 Pts</th>
            <th>Winner</th>
-           <th></th>
          </tr></thead><tbody></tbody>`;
       const tbody = table.querySelector("tbody");
       for (const m of matches) {
@@ -286,9 +285,6 @@
         const winnerLabel = s.complete
           ? (s.winner === "Tie" ? "Tie" : escapeHtml(s.winner))
           : "—";
-        const btn = s.complete
-          ? `<button class="enter-score done" data-match="${m.id}">Edit</button>`
-          : `<button class="enter-score" data-match="${m.id}">Enter</button>`;
 
         const p1WinClass = s.complete && s.winner === m.p1 ? " winner-p1" : "";
         const p2WinClass = s.complete && s.winner === m.p2 ? " winner-p2" : "";
@@ -300,20 +296,12 @@
           `<td class="${p2WinClass}">${escapeHtml(m.p2)}</td>` +
           `<td class="pts">${s.p1Points}</td>` +
           `<td class="pts">${s.p2Points}</td>` +
-          `<td class="winner">${winnerLabel}</td>` +
-          `<td>${btn}</td>`;
+          `<td class="winner">${winnerLabel}</td>`;
         tbody.appendChild(tr);
       }
       wrap.appendChild(table);
       container.appendChild(wrap);
     }
-
-    // Bind buttons
-    container.querySelectorAll("button.enter-score").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        openMatchModal(Number(btn.dataset.match));
-      });
-    });
   }
 
   function renderPlayerFilter() {
