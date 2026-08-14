@@ -244,8 +244,14 @@ table.matches th,
 table.matches td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
-  text-align: left;
+  text-align: center;
   font-size: 0.85rem;
+}
+table.matches th:nth-child(2),
+table.matches td:nth-child(2),
+table.matches th:nth-child(6),
+table.matches td:nth-child(6) {
+  text-align: left;
 }
 table.matches th {
   background: var(--panel-2);

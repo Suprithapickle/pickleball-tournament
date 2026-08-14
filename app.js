@@ -266,7 +266,6 @@
            <th>R1</th><th>R2</th><th>R3</th>
            <th>Player 2</th>
            <th>P1 Pts</th><th>P2 Pts</th>
-           <th>Winner</th>
          </tr></thead><tbody></tbody>`;
       const tbody = table.querySelector("tbody");
       for (const m of matches) {
@@ -275,16 +274,20 @@
         const tr = document.createElement("tr");
         if (s.complete) tr.className = "completed";
         const roundCell = (idx) => {
-          if (!r || !r.rounds || !r.rounds[idx]) return `<td class="rounds">—</td>`;
+          const hasResult = !!(r && r.rounds);
+          if (!hasResult || !r.rounds[idx]) {
+            if (idx === 2 && hasResult) return `<td class="rounds">0-0</td>`;
+            return `<td class="rounds">—</td>`;
+          }
           const rn = r.rounds[idx];
-          const s1 = Number.isFinite(Number(rn.p1)) ? rn.p1 : "";
-          const s2 = Number.isFinite(Number(rn.p2)) ? rn.p2 : "";
-          if (s1 === "" && s2 === "") return `<td class="rounds">—</td>`;
-          return `<td class="rounds">${s1}-${s2}</td>`;
+          const s1 = Number.isFinite(Number(rn.p1)) ? rn.p1 : null;
+          const s2 = Number.isFinite(Number(rn.p2)) ? rn.p2 : null;
+          if (s1 === null && s2 === null) {
+            if (idx === 2) return `<td class="rounds">0-0</td>`;
+            return `<td class="rounds">—</td>`;
+          }
+          return `<td class="rounds">${s1 ?? 0}-${s2 ?? 0}</td>`;
         };
-        const winnerLabel = s.complete
-          ? (s.winner === "Tie" ? "Tie" : escapeHtml(s.winner))
-          : "—";
 
         const p1WinClass = s.complete && s.winner === m.p1 ? " winner-p1" : "";
         const p2WinClass = s.complete && s.winner === m.p2 ? " winner-p2" : "";
@@ -295,8 +298,7 @@
           roundCell(0) + roundCell(1) + roundCell(2) +
           `<td class="${p2WinClass}">${escapeHtml(m.p2)}</td>` +
           `<td class="pts">${s.p1Points}</td>` +
-          `<td class="pts">${s.p2Points}</td>` +
-          `<td class="winner">${winnerLabel}</td>`;
+          `<td class="pts">${s.p2Points}</td>`;
         tbody.appendChild(tr);
       }
       wrap.appendChild(table);
