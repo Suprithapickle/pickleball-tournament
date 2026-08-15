@@ -45,12 +45,12 @@ const SCHEDULE = [
   { id: 20, date: "2026-08-14", day: "Fri", p1: "Kavitha",       p2: "Naveen" },
   { id: 21, date: "2026-08-14", day: "Fri", p1: "Ravi Pasunuri", p2: "Ramesh" },
 
-  // Sat, Aug 15, 2026
-  { id: 22, date: "2026-08-15", day: "Sat", p1: "Ravi Attada",   p2: "Pawan" },
-  { id: 23, date: "2026-08-15", day: "Sat", p1: "Rohith",        p2: "Naveen" },
-  { id: 24, date: "2026-08-15", day: "Sat", p1: "Likitha",       p2: "Ramesh" },
-  { id: 25, date: "2026-08-15", day: "Sat", p1: "Kavitha",       p2: "Ravi Pasunuri" },
-  { id: 26, date: "2026-08-15", day: "Sat", p1: "Rohith",        p2: "Hari Krishna" },
+  // Sun, Aug 16, 2026
+  { id: 22, date: "2026-08-16", day: "Sun", p1: "Ravi Attada",   p2: "Pawan" },
+  { id: 23, date: "2026-08-16", day: "Sun", p1: "Rohith",        p2: "Naveen" },
+  { id: 24, date: "2026-08-16", day: "Sun", p1: "Likitha",       p2: "Ramesh" },
+  { id: 25, date: "2026-08-16", day: "Sun", p1: "Kavitha",       p2: "Ravi Pasunuri" },
+  { id: 26, date: "2026-08-16", day: "Sun", p1: "Rohith",        p2: "Hari Krishna" },
 
   // Thu, Aug 20, 2026
   { id: 27, date: "2026-08-20", day: "Thu", p1: "Ravi Attada",   p2: "Sathish" },
