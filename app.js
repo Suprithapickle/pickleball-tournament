@@ -202,12 +202,24 @@
     for (const m of SCHEDULE) if (matchSummary(m).complete) played++;
     const remaining = total - played;
     const pct = total ? Math.round((played / total) * 100) : 0;
+
+    const doublesTotal = DOUBLES_SCHEDULE.length;
+    let doublesPlayed = 0;
+    for (const m of DOUBLES_SCHEDULE) if (doublesMatchSummary(m).complete) doublesPlayed++;
+    const doublesRemaining = doublesTotal - doublesPlayed;
+    const doublesPct = doublesTotal ? Math.round((doublesPlayed / doublesTotal) * 100) : 0;
+
     return {
       totalPlayers: state.players.length,
+      totalTeams: state.teams.length,
       totalMatches: total,
       matchesPlayed: played,
       matchesRemaining: remaining,
       completionPct: pct,
+      doublesTotalMatches: doublesTotal,
+      doublesMatchesPlayed: doublesPlayed,
+      doublesMatchesRemaining: doublesRemaining,
+      doublesCompletionPct: doublesPct,
       duration: TOURNAMENT_META.duration
     };
   }
@@ -232,10 +244,15 @@
     grid.innerHTML = "";
     const cards = [
       { label: "Total Players", value: s.totalPlayers, cls: "accent" },
-      { label: "Total Matches", value: s.totalMatches, cls: "" },
-      { label: "Matches Played", value: s.matchesPlayed, cls: "good" },
-      { label: "Matches Remaining", value: s.matchesRemaining, cls: "warn" },
-      { label: "Completion", value: s.completionPct + "%", cls: "accent" },
+      { label: "Singles Matches", value: s.totalMatches, cls: "" },
+      { label: "Singles Played", value: s.matchesPlayed, cls: "good" },
+      { label: "Singles Remaining", value: s.matchesRemaining, cls: "warn" },
+      { label: "Singles Completion", value: s.completionPct + "%", cls: "accent" },
+      { label: "Total Teams", value: s.totalTeams, cls: "accent" },
+      { label: "Doubles Matches", value: s.doublesTotalMatches, cls: "" },
+      { label: "Doubles Played", value: s.doublesMatchesPlayed, cls: "good" },
+      { label: "Doubles Remaining", value: s.doublesMatchesRemaining, cls: "warn" },
+      { label: "Doubles Completion", value: s.doublesCompletionPct + "%", cls: "accent" },
       { label: "Round", value: s.duration, cls: "" }
     ];
     for (const c of cards) {
@@ -288,27 +305,6 @@
         `<td class="points">${r.points}</td>`;
       tbody.appendChild(tr);
     });
-  }
-
-  function renderNextUp() {
-    const container = document.getElementById("next-up");
-    container.innerHTML = "";
-    const pending = SCHEDULE.filter((m) => !matchSummary(m).complete);
-    if (!pending.length) {
-      container.innerHTML = '<p class="hint">🎉 All matches complete!</p>';
-      return;
-    }
-    const nextDate = pending[0].date;
-    const nextDayMatches = pending.filter((m) => m.date === nextDate);
-    for (const m of nextDayMatches) {
-      const card = document.createElement("div");
-      card.className = "match-card";
-      card.innerHTML =
-        `<div class="date">Match #${m.id} · ${fmtDate(m.date)}</div>` +
-        `<div class="matchup">${escapeHtml(m.p1)} 🆚 ${escapeHtml(m.p2)}</div>`;
-      card.addEventListener("click", () => openMatchModal(m.id));
-      container.appendChild(card);
-    }
   }
 
   function renderSchedule() {
@@ -418,7 +414,7 @@
            <th>Team 1</th>
            <th>R1</th><th>R2</th><th>R3</th>
            <th>Team 2</th>
-           <th>P1 Pts</th><th>P2 Pts</th>
+           <th>T1 Pts</th><th>T2 Pts</th>
          </tr></thead><tbody></tbody>`;
       const tbody = table.querySelector("tbody");
       for (const m of matches) {
@@ -517,24 +513,17 @@
     }
   }
 
-  function renderDataPreview() {
-    const pre = document.getElementById("results-preview");
-    pre.textContent = JSON.stringify(state, null, 2);
-  }
-
   function renderAll() {
     renderHero();
     renderStats();
     renderLeaderboard();
     renderDoublesLeaderboard();
-    renderNextUp();
     renderPlayerFilter();
     renderTeamFilter();
     renderSchedule();
     renderDoublesSchedule();
     renderPlayers();
     renderTeams();
-    renderDataPreview();
   }
 
   // -------------------- Modal --------------------
@@ -688,50 +677,6 @@
     });
   }
 
-  // -------------------- Import / Export --------------------
-
-  function exportJSON() {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pickleball-tournament-results.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function importJSONFile(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        if (!parsed || typeof parsed !== "object") throw new Error("Not an object");
-        const players = Array.isArray(parsed.players) ? parsed.players : state.players;
-        const teams = Array.isArray(parsed.teams) && parsed.teams.length ? parsed.teams : state.teams;
-        const results = parsed.results && typeof parsed.results === "object" ? parsed.results : {};
-        const doublesResults = parsed.doublesResults && typeof parsed.doublesResults === "object" ? parsed.doublesResults : {};
-        if (!confirm("Replace current data with imported file?")) return;
-        state = { players, teams, results, doublesResults };
-        saveState();
-        renderAll();
-        alert("Import successful.");
-      } catch (e) {
-        alert("Import failed: " + e.message);
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  function resetScores() {
-    if (!confirm("Delete ALL match scores? Player list is kept.")) return;
-    state.results = {};
-    state.doublesResults = {};
-    saveState();
-    renderAll();
-  }
-
   // -------------------- Remote sync (results.json in the repo) --------------------
 
   const REMOTE_APPLIED_KEY = "pickleball-remote-applied-v1";
@@ -801,17 +746,6 @@
     }
   }
 
-  async function manualSyncFromRepo() {
-    const remote = await fetchRemoteResults();
-    if (!remote) {
-      alert("Could not fetch results.json from the repo.");
-      return;
-    }
-    if (!confirm("Replace your local data with the latest results.json from the repo?")) return;
-    applyRemote(remote, { silent: true });
-    alert("Loaded latest scores from repo.");
-  }
-
   function showBanner(html) {
     let el = document.getElementById("sync-banner");
     if (!el) {
@@ -876,19 +810,6 @@
       input.value = "";
       renderAll();
     });
-
-    document.getElementById("export-btn").addEventListener("click", exportJSON);
-    document.getElementById("import-btn").addEventListener("click", () =>
-      document.getElementById("import-file").click()
-    );
-    document.getElementById("import-file").addEventListener("change", (e) => {
-      const f = e.target.files && e.target.files[0];
-      if (f) importJSONFile(f);
-      e.target.value = "";
-    });
-    document.getElementById("reset-btn").addEventListener("click", resetScores);
-    const syncBtn = document.getElementById("sync-btn");
-    if (syncBtn) syncBtn.addEventListener("click", manualSyncFromRepo);
 
     autoSyncOnLoad();
   });
