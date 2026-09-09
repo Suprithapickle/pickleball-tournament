@@ -243,7 +243,6 @@
     const grid = document.getElementById("stats-grid");
     grid.innerHTML = "";
     const cards = [
-      { label: "Total Players", value: s.totalPlayers, cls: "accent" },
       { label: "Total Teams", value: s.totalTeams, cls: "accent" },
       { label: "Doubles Matches", value: s.doublesTotalMatches, cls: "" },
       { label: "Doubles Played", value: s.doublesMatchesPlayed, cls: "good" },
