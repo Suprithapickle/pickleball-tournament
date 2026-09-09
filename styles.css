@@ -339,6 +339,45 @@ button.enter-score.done {
 }
 .player-list li.locked button.remove { visibility: hidden; }
 
+/* Doubles teams list */
+.team-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.team-list li {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.team-list li .team-name {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.team-list li .team-players {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Doubles leaderboard cell (team + players sub-label) */
+table.leaderboard td .team-name {
+  font-weight: 700;
+}
+table.leaderboard td .team-players {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+/* Doubles schedule rows are clickable */
+#doubles-schedule-list table.matches tbody tr { cursor: pointer; }
+
 /* Data actions */
 .data-actions {
   display: flex;

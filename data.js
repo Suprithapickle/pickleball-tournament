@@ -86,3 +86,27 @@ const TOURNAMENT_META = {
   info: "Start 5:30 PM · 2 Grounds (A & B) · 45 mins / match",
   duration: "League"
 };
+
+// -------------------- Doubles --------------------
+
+const TEAMS = [
+  { name: "Lions",      players: ["Rohith", "Kavitha"] },
+  { name: "Huli Puli",  players: ["Naveen", "Sathish"] },
+  { name: "Hawks",      players: ["Pawan", "Likitha"] },
+  { name: "Destroyers", players: ["Ramesh", "Ravi Attada"] },
+  { name: "Warriors",   players: ["Ravi Pasunuri", "Hari Krishna"] }
+];
+
+// Round-robin: each team plays every other team once (10 matches).
+const DOUBLES_SCHEDULE = [
+  { id: "D1",  round: 1, t1: "Lions",      t2: "Huli Puli"  },
+  { id: "D2",  round: 1, t1: "Hawks",      t2: "Destroyers" },
+  { id: "D3",  round: 2, t1: "Lions",      t2: "Hawks"      },
+  { id: "D4",  round: 2, t1: "Huli Puli",  t2: "Warriors"   },
+  { id: "D5",  round: 3, t1: "Lions",      t2: "Destroyers" },
+  { id: "D6",  round: 3, t1: "Hawks",      t2: "Warriors"   },
+  { id: "D7",  round: 4, t1: "Lions",      t2: "Warriors"   },
+  { id: "D8",  round: 4, t1: "Huli Puli",  t2: "Destroyers" },
+  { id: "D9",  round: 5, t1: "Huli Puli",  t2: "Hawks"      },
+  { id: "D10", round: 5, t1: "Destroyers", t2: "Warriors"   }
+];

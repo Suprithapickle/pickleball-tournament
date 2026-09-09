@@ -12,9 +12,10 @@ Based on the tournament format:
 
 ## Features
 
-- 📊 **Dashboard** — tournament stats, points leaderboard (auto-ranked), and "Next Up" match cards.
-- 📅 **Schedule** — all 45 matches grouped by date, filterable by player and status. Click any match to enter or edit scores.
-- 👥 **Players** — see the roster, add new players.
+- 📊 **Dashboard** — tournament stats, points leaderboards (Doubles + Singles, auto-ranked), and "Next Up" match cards.
+- 📅 **Schedule** — all 45 singles matches grouped by date, filterable by player and status. Click any match to enter or edit scores.
+- 🤝 **Doubles Schedule** — round-robin schedule for the 5 doubles teams. Click any match to enter or edit scores.
+- 👥 **Players** — see the roster and doubles teams; add new players.
 - 💾 **Data** — export / import all results as JSON, or reset scores.
 - 🔒 All data is stored **locally in the browser** (`localStorage`) — no backend, no login required.
 

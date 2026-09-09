@@ -17,7 +17,9 @@
    * State shape:
    * {
    *   players: string[],
-   *   results: { [matchId]: { rounds: [{p1:number,p2:number}, ...] } }
+   *   teams: { name: string, players: string[] }[],
+   *   results: { [matchId]: { rounds: [{p1:number,p2:number}, ...] } },
+   *   doublesResults: { [matchId]: { rounds: [{p1:number,p2:number}, ...] } }
    * }
    */
   let state = loadState();
@@ -29,13 +31,15 @@
         const parsed = JSON.parse(raw);
         return {
           players: Array.isArray(parsed.players) ? parsed.players : PLAYERS.slice(),
-          results: parsed.results && typeof parsed.results === "object" ? parsed.results : {}
+          teams: Array.isArray(parsed.teams) && parsed.teams.length ? parsed.teams : TEAMS.slice(),
+          results: parsed.results && typeof parsed.results === "object" ? parsed.results : {},
+          doublesResults: parsed.doublesResults && typeof parsed.doublesResults === "object" ? parsed.doublesResults : {}
         };
       }
     } catch (e) {
       console.warn("Failed to load state, starting fresh.", e);
     }
-    return { players: PLAYERS.slice(), results: {} };
+    return { players: PLAYERS.slice(), teams: TEAMS.slice(), results: {}, doublesResults: {} };
   }
 
   function saveState() {
@@ -52,9 +56,12 @@
     return state.results[matchId] || null;
   }
 
-  /** returns { played, p1Points, p2Points, p1RoundWins, p2RoundWins, winner, complete } */
-  function matchSummary(match) {
-    const r = matchResult(match.id);
+  function doublesMatchResult(matchId) {
+    return state.doublesResults[matchId] || null;
+  }
+
+  /** Generic best-of-3 summary from a stored result. */
+  function summarizeRounds(r, p1Label, p2Label) {
     if (!r || !Array.isArray(r.rounds)) {
       return {
         played: false, complete: false,
@@ -72,16 +79,14 @@
       if (s1 > s2) p1RW++;
       else if (s2 > s1) p2RW++;
     }
-    // Best-of-3: match is complete when either side reaches 2 round wins,
-    // or when all 3 rounds have been played (covers ties / draws).
     const decided = p1RW >= ROUND_WINS_TO_WIN_MATCH || p2RW >= ROUND_WINS_TO_WIN_MATCH;
     const complete = decided || filledRounds === ROUNDS_PER_MATCH;
     const p1Points = p1RW * POINTS_PER_ROUND_WIN;
     const p2Points = p2RW * POINTS_PER_ROUND_WIN;
     let winner = null;
     if (complete) {
-      if (p1RW > p2RW) winner = match.p1;
-      else if (p2RW > p1RW) winner = match.p2;
+      if (p1RW > p2RW) winner = p1Label;
+      else if (p2RW > p1RW) winner = p2Label;
       else winner = "Tie";
     }
     return {
@@ -91,6 +96,15 @@
       p1RoundWins: p1RW, p2RoundWins: p2RW,
       winner
     };
+  }
+
+  /** returns { played, p1Points, p2Points, p1RoundWins, p2RoundWins, winner, complete } */
+  function matchSummary(match) {
+    return summarizeRounds(matchResult(match.id), match.p1, match.p2);
+  }
+
+  function doublesMatchSummary(match) {
+    return summarizeRounds(doublesMatchResult(match.id), match.t1, match.t2);
   }
 
   function computeLeaderboard() {
@@ -133,6 +147,51 @@
       if (b.wins !== a.wins) return b.wins - a.wins;
       if (b.roundWins !== a.roundWins) return b.roundWins - a.roundWins;
       return a.player.localeCompare(b.player);
+    });
+    return list;
+  }
+
+  function computeDoublesLeaderboard() {
+    const stats = {};
+    for (const t of state.teams) {
+      stats[t.name] = {
+        team: t.name, players: t.players || [],
+        played: 0, wins: 0, losses: 0,
+        ties: 0, roundWins: 0, points: 0
+      };
+    }
+    for (const match of DOUBLES_SCHEDULE) {
+      const s = doublesMatchSummary(match);
+      if (!s.complete) continue;
+      const t1 = stats[match.t1];
+      const t2 = stats[match.t2];
+      if (t1) {
+        t1.played++;
+        t1.roundWins += s.p1RoundWins;
+        t1.points += s.p1Points;
+      }
+      if (t2) {
+        t2.played++;
+        t2.roundWins += s.p2RoundWins;
+        t2.points += s.p2Points;
+      }
+      if (s.winner === "Tie") {
+        if (t1) t1.ties++;
+        if (t2) t2.ties++;
+      } else if (s.winner === match.t1) {
+        if (t1) t1.wins++;
+        if (t2) t2.losses++;
+      } else if (s.winner === match.t2) {
+        if (t2) t2.wins++;
+        if (t1) t1.losses++;
+      }
+    }
+    const list = Object.values(stats);
+    list.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (b.roundWins !== a.roundWins) return b.roundWins - a.roundWins;
+      return a.team.localeCompare(b.team);
     });
     return list;
   }
@@ -200,6 +259,29 @@
       tr.innerHTML =
         `<td class="rank">${medal}${i + 1}</td>` +
         `<td>${escapeHtml(r.player)}</td>` +
+        `<td>${r.played}</td>` +
+        `<td>${r.wins}</td>` +
+        `<td>${r.losses}</td>` +
+        `<td class="points">${r.points}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderDoublesLeaderboard() {
+    const rows = computeDoublesLeaderboard();
+    const tbody = document.querySelector("#leaderboard-doubles tbody");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.className = "rank-" + (i + 1);
+      const medal = i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : "";
+      const playersLabel = r.players && r.players.length
+        ? `<div class="team-players">${escapeHtml(r.players.join(" & "))}</div>`
+        : "";
+      tr.innerHTML =
+        `<td class="rank">${medal}${i + 1}</td>` +
+        `<td><div class="team-name">${escapeHtml(r.team)}</div>${playersLabel}</td>` +
         `<td>${r.played}</td>` +
         `<td>${r.wins}</td>` +
         `<td>${r.losses}</td>` +
@@ -300,6 +382,92 @@
     }
   }
 
+  function renderDoublesSchedule() {
+    const container = document.getElementById("doubles-schedule-list");
+    if (!container) return;
+    const filterTeam = document.getElementById("filter-team").value;
+    const filterStatus = document.getElementById("filter-doubles-status").value;
+
+    const byRound = new Map();
+    for (const m of DOUBLES_SCHEDULE) {
+      if (filterTeam && m.t1 !== filterTeam && m.t2 !== filterTeam) continue;
+      const s = doublesMatchSummary(m);
+      if (filterStatus === "pending" && s.complete) continue;
+      if (filterStatus === "completed" && !s.complete) continue;
+      if (!byRound.has(m.round)) byRound.set(m.round, []);
+      byRound.get(m.round).push(m);
+    }
+
+    container.innerHTML = "";
+    if (!byRound.size) {
+      container.innerHTML = '<p class="hint">No matches match the current filter.</p>';
+      return;
+    }
+
+    for (const [round, matches] of byRound) {
+      const complete = matches.filter((m) => doublesMatchSummary(m).complete).length;
+      const wrap = document.createElement("div");
+      wrap.className = "day-group";
+      wrap.innerHTML =
+        `<h3>🤝 Round ${round} <span class="progress">${complete}/${matches.length} played</span></h3>`;
+      const table = document.createElement("table");
+      table.className = "matches";
+      table.innerHTML =
+        `<thead><tr>
+           <th>#</th>
+           <th>Team 1</th>
+           <th>R1</th><th>R2</th><th>R3</th>
+           <th>Team 2</th>
+           <th>P1 Pts</th><th>P2 Pts</th>
+         </tr></thead><tbody></tbody>`;
+      const tbody = table.querySelector("tbody");
+      for (const m of matches) {
+        const s = doublesMatchSummary(m);
+        const r = doublesMatchResult(m.id);
+        const tr = document.createElement("tr");
+        if (s.complete) tr.className = "completed";
+        const roundCell = (idx) => {
+          const hasResult = !!(r && r.rounds);
+          if (!hasResult || !r.rounds[idx]) return `<td class="rounds">—</td>`;
+          const rn = r.rounds[idx];
+          const s1 = Number.isFinite(Number(rn.p1)) ? rn.p1 : null;
+          const s2 = Number.isFinite(Number(rn.p2)) ? rn.p2 : null;
+          if (s1 === null && s2 === null) return `<td class="rounds">—</td>`;
+          return `<td class="rounds">${s1 ?? 0}-${s2 ?? 0}</td>`;
+        };
+
+        const t1WinClass = s.complete && s.winner === m.t1 ? " winner-p1" : "";
+        const t2WinClass = s.complete && s.winner === m.t2 ? " winner-p2" : "";
+
+        tr.innerHTML =
+          `<td>${m.id}</td>` +
+          `<td class="${t1WinClass}">${escapeHtml(m.t1)}</td>` +
+          roundCell(0) + roundCell(1) + roundCell(2) +
+          `<td class="${t2WinClass}">${escapeHtml(m.t2)}</td>` +
+          `<td class="pts">${s.p1Points}</td>` +
+          `<td class="pts">${s.p2Points}</td>`;
+        tr.addEventListener("click", () => openMatchModal(m.id, "doubles"));
+        tbody.appendChild(tr);
+      }
+      wrap.appendChild(table);
+      container.appendChild(wrap);
+    }
+  }
+
+  function renderTeamFilter() {
+    const sel = document.getElementById("filter-team");
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— All —</option>';
+    for (const t of state.teams) {
+      const o = document.createElement("option");
+      o.value = t.name;
+      o.textContent = t.name;
+      sel.appendChild(o);
+    }
+    if (state.teams.some((t) => t.name === current)) sel.value = current;
+  }
+
   function renderPlayerFilter() {
     const sel = document.getElementById("filter-player");
     const current = sel.value;
@@ -335,6 +503,20 @@
     }
   }
 
+  function renderTeams() {
+    const ul = document.getElementById("team-list");
+    if (!ul) return;
+    ul.innerHTML = "";
+    for (const t of state.teams) {
+      const li = document.createElement("li");
+      const players = Array.isArray(t.players) ? t.players.join(" & ") : "";
+      li.innerHTML =
+        `<div class="team-name">${escapeHtml(t.name)}</div>` +
+        `<div class="team-players">${escapeHtml(players)}</div>`;
+      ul.appendChild(li);
+    }
+  }
+
   function renderDataPreview() {
     const pre = document.getElementById("results-preview");
     pre.textContent = JSON.stringify(state, null, 2);
@@ -344,31 +526,56 @@
     renderHero();
     renderStats();
     renderLeaderboard();
+    renderDoublesLeaderboard();
     renderNextUp();
     renderPlayerFilter();
+    renderTeamFilter();
     renderSchedule();
+    renderDoublesSchedule();
     renderPlayers();
+    renderTeams();
     renderDataPreview();
   }
 
   // -------------------- Modal --------------------
 
   let currentMatchId = null;
+  let currentMatchKind = "singles"; // "singles" | "doubles"
 
-  function openMatchModal(matchId) {
-    const match = SCHEDULE.find((m) => m.id === matchId);
+  function findMatch(matchId, kind) {
+    if (kind === "doubles") return DOUBLES_SCHEDULE.find((m) => m.id === matchId);
+    return SCHEDULE.find((m) => m.id === matchId);
+  }
+
+  function matchSides(match, kind) {
+    return kind === "doubles"
+      ? { p1: match.t1, p2: match.t2 }
+      : { p1: match.p1, p2: match.p2 };
+  }
+
+  function resultsBucket(kind) {
+    return kind === "doubles" ? state.doublesResults : state.results;
+  }
+
+  function openMatchModal(matchId, kind) {
+    kind = kind || "singles";
+    const match = findMatch(matchId, kind);
     if (!match) return;
     currentMatchId = matchId;
-    document.getElementById("modal-title").textContent =
-      `Match #${match.id} — ${fmtDate(match.date)}`;
+    currentMatchKind = kind;
+    const sides = matchSides(match, kind);
+    const heading = kind === "doubles"
+      ? `Match ${match.id} — Round ${match.round}`
+      : `Match #${match.id} — ${fmtDate(match.date)}`;
+    document.getElementById("modal-title").textContent = heading;
     document.getElementById("modal-sub").textContent =
       `Best of 3 rounds. Round winner earns ${POINTS_PER_ROUND_WIN} points. R3 only if needed.`;
-    document.getElementById("modal-p1").textContent = match.p1;
-    document.getElementById("modal-p2").textContent = match.p2;
+    document.getElementById("modal-p1").textContent = sides.p1;
+    document.getElementById("modal-p2").textContent = sides.p2;
 
     const rows = document.getElementById("round-rows");
     rows.innerHTML = "";
-    const existing = matchResult(matchId);
+    const existing = resultsBucket(kind)[matchId] || null;
     for (let i = 0; i < ROUNDS_PER_MATCH; i++) {
       const r = existing && existing.rounds && existing.rounds[i] ? existing.rounds[i] : { p1: "", p2: "" };
       const tr = document.createElement("tr");
@@ -400,8 +607,9 @@
   }
 
   function updateModalSummary() {
-    const match = SCHEDULE.find((m) => m.id === currentMatchId);
+    const match = findMatch(currentMatchId, currentMatchKind);
     if (!match) return;
+    const sides = matchSides(match, currentMatchKind);
     // Compute preview
     const rounds = collectRoundsFromModal();
     let p1RW = 0, p2RW = 0, filled = 0;
@@ -414,12 +622,12 @@
     const p1Pts = p1RW * POINTS_PER_ROUND_WIN;
     const p2Pts = p2RW * POINTS_PER_ROUND_WIN;
     let msg = `Rounds filled: <strong>${filled}/${ROUNDS_PER_MATCH}</strong> · ` +
-              `Points — ${escapeHtml(match.p1)}: <strong>${p1Pts}</strong> · ` +
-              `${escapeHtml(match.p2)}: <strong>${p2Pts}</strong>`;
+              `Points — ${escapeHtml(sides.p1)}: <strong>${p1Pts}</strong> · ` +
+              `${escapeHtml(sides.p2)}: <strong>${p2Pts}</strong>`;
     if (filled === ROUNDS_PER_MATCH || p1RW >= ROUND_WINS_TO_WIN_MATCH || p2RW >= ROUND_WINS_TO_WIN_MATCH) {
       let winner = "Tie";
-      if (p1RW > p2RW) winner = match.p1;
-      else if (p2RW > p1RW) winner = match.p2;
+      if (p1RW > p2RW) winner = sides.p1;
+      else if (p2RW > p1RW) winner = sides.p2;
       msg += `<br>🏆 Winner: <strong>${escapeHtml(winner)}</strong>`;
     } else {
       msg += `<br>Best of 3 — first to ${ROUND_WINS_TO_WIN_MATCH} round wins takes the match.`;
@@ -430,6 +638,7 @@
   function closeModal() {
     document.getElementById("score-modal").hidden = true;
     currentMatchId = null;
+    currentMatchKind = "singles";
   }
 
   function saveModal() {
@@ -451,7 +660,7 @@
         return;
       }
     }
-    state.results[currentMatchId] = { rounds };
+    resultsBucket(currentMatchKind)[currentMatchId] = { rounds };
     saveState();
     closeModal();
     renderAll();
@@ -460,7 +669,7 @@
   function clearMatch() {
     if (currentMatchId == null) return;
     if (!confirm("Clear scores for this match?")) return;
-    delete state.results[currentMatchId];
+    delete resultsBucket(currentMatchKind)[currentMatchId];
     saveState();
     closeModal();
     renderAll();
@@ -500,9 +709,11 @@
         const parsed = JSON.parse(reader.result);
         if (!parsed || typeof parsed !== "object") throw new Error("Not an object");
         const players = Array.isArray(parsed.players) ? parsed.players : state.players;
+        const teams = Array.isArray(parsed.teams) && parsed.teams.length ? parsed.teams : state.teams;
         const results = parsed.results && typeof parsed.results === "object" ? parsed.results : {};
+        const doublesResults = parsed.doublesResults && typeof parsed.doublesResults === "object" ? parsed.doublesResults : {};
         if (!confirm("Replace current data with imported file?")) return;
-        state = { players, results };
+        state = { players, teams, results, doublesResults };
         saveState();
         renderAll();
         alert("Import successful.");
@@ -516,6 +727,7 @@
   function resetScores() {
     if (!confirm("Delete ALL match scores? Player list is kept.")) return;
     state.results = {};
+    state.doublesResults = {};
     saveState();
     renderAll();
   }
@@ -546,10 +758,16 @@
     const players = Array.isArray(remote.players) && remote.players.length
       ? remote.players
       : state.players;
+    const teams = Array.isArray(remote.teams) && remote.teams.length
+      ? remote.teams
+      : state.teams;
     const results = remote.results && typeof remote.results === "object"
       ? remote.results
       : {};
-    state = { players, results };
+    const doublesResults = remote.doublesResults && typeof remote.doublesResults === "object"
+      ? remote.doublesResults
+      : {};
+    state = { players, teams, results, doublesResults };
     saveState();
     localStorage.setItem(REMOTE_APPLIED_KEY, fingerprint(remote));
     renderAll();
@@ -632,6 +850,11 @@
 
     document.getElementById("filter-player").addEventListener("change", renderSchedule);
     document.getElementById("filter-status").addEventListener("change", renderSchedule);
+
+    const teamFilterEl = document.getElementById("filter-team");
+    if (teamFilterEl) teamFilterEl.addEventListener("change", renderDoublesSchedule);
+    const doublesStatusEl = document.getElementById("filter-doubles-status");
+    if (doublesStatusEl) doublesStatusEl.addEventListener("change", renderDoublesSchedule);
 
     document.getElementById("modal-close").addEventListener("click", closeModal);
     document.getElementById("save-match").addEventListener("click", saveModal);
