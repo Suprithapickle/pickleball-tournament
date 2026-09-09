@@ -244,10 +244,6 @@
     grid.innerHTML = "";
     const cards = [
       { label: "Total Players", value: s.totalPlayers, cls: "accent" },
-      { label: "Singles Matches", value: s.totalMatches, cls: "" },
-      { label: "Singles Played", value: s.matchesPlayed, cls: "good" },
-      { label: "Singles Remaining", value: s.matchesRemaining, cls: "warn" },
-      { label: "Singles Completion", value: s.completionPct + "%", cls: "accent" },
       { label: "Total Teams", value: s.totalTeams, cls: "accent" },
       { label: "Doubles Matches", value: s.doublesTotalMatches, cls: "" },
       { label: "Doubles Played", value: s.doublesMatchesPlayed, cls: "good" },

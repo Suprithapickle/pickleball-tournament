@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pickleball Tournament</title>
-  <link rel="stylesheet" href="styles.css?v=11" />
+  <link rel="stylesheet" href="styles.css?v=12" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%8F%93%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
@@ -16,8 +16,8 @@
 
   <nav class="tabs" role="tablist">
     <button class="tab active" data-tab="dashboard" role="tab">📊 Dashboard</button>
-    <button class="tab" data-tab="schedule" role="tab">📅 Singles Schedule</button>
     <button class="tab" data-tab="doubles-schedule" role="tab">🤝 Doubles Schedule</button>
+    <button class="tab" data-tab="schedule" role="tab">📅 Singles Schedule</button>
     <button class="tab" data-tab="players" role="tab">👥 Players</button>
   </nav>
 
@@ -61,25 +61,6 @@
       </div>
     </section>
 
-    <!-- Schedule -->
-    <section id="schedule" class="tab-panel">
-      <div class="schedule-toolbar">
-        <label>
-          Filter by player:
-          <select id="filter-player"><option value="">— All —</option></select>
-        </label>
-        <label>
-          Show:
-          <select id="filter-status">
-            <option value="all">All matches</option>
-            <option value="pending">Pending only</option>
-            <option value="completed">Completed only</option>
-          </select>
-        </label>
-      </div>
-      <div id="schedule-list"></div>
-    </section>
-
     <!-- Doubles Schedule -->
     <section id="doubles-schedule" class="tab-panel">
       <div class="schedule-toolbar">
@@ -97,6 +78,25 @@
         </label>
       </div>
       <div id="doubles-schedule-list"></div>
+    </section>
+
+    <!-- Schedule -->
+    <section id="schedule" class="tab-panel">
+      <div class="schedule-toolbar">
+        <label>
+          Filter by player:
+          <select id="filter-player"><option value="">— All —</option></select>
+        </label>
+        <label>
+          Show:
+          <select id="filter-status">
+            <option value="all">All matches</option>
+            <option value="pending">Pending only</option>
+            <option value="completed">Completed only</option>
+          </select>
+        </label>
+      </div>
+      <div id="schedule-list"></div>
     </section>
 
     <!-- Players -->
@@ -147,7 +147,7 @@
     <p>Static site · Data stored locally in your browser · Deployable to GitHub Pages</p>
   </footer>
 
-  <script src="data.js?v=12"></script>
-  <script src="app.js?v=12"></script>
+  <script src="data.js?v=13"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
