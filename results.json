@@ -19,8 +19,12 @@
     { "name": "Warriors",   "players": ["Ravi Pasunuri", "Hari Krishna"] }
   ],
   "doublesResults": {
+    "D1":  { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "D2":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
     "D4":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
     "D5":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
+    "D6":  { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] },
+    "D7":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
     "D8":  { "rounds": [ { "p1": 2, "p2": 0 }, { "p1": 2, "p2": 0 }, { "p1": null, "p2": null } ] },
     "D10": { "rounds": [ { "p1": 0, "p2": 2 }, { "p1": 0, "p2": 2 }, { "p1": null, "p2": null } ] }
   },
